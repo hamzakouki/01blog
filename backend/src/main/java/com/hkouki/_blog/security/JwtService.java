@@ -1,5 +1,6 @@
 package com.hkouki._blog.security;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -73,7 +74,8 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
+       byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+       return Keys.hmacShaKeyFor(keyBytes);
+   }
+
 }
