@@ -32,6 +32,13 @@ public class AuthService {
         }
         String hashedPassword = passwordEncoder.encode(dto.getPassword());
         User user = new User();
+
+        long howMuchUsersindb = userRepository.count();
+        if (howMuchUsersindb == 0) {
+            user.setRole(com.hkouki._blog.entity.Role.ADMIN); // First user is ADMIN
+        } else {
+            user.setRole(com.hkouki._blog.entity.Role.USER); // Others are USER
+        }
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(hashedPassword);
