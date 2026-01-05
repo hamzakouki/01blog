@@ -43,6 +43,7 @@ public class AuthService {
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setEnabled(true);
 
         if (userRepository.count() == 0) {
             user.setRole(Role.ADMIN);

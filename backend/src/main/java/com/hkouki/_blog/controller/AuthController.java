@@ -12,6 +12,8 @@ import com.hkouki._blog.dto.RegisterRequest;
 import com.hkouki._blog.service.AuthService;
 
 import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @RestController
@@ -27,11 +29,11 @@ public class AuthController {
     // register endpoint
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest dto) {
+
         authService.register(dto);
 
         ApiResponse<Void> response = new ApiResponse<>("success", null, "User registered successfully");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // login endpoint

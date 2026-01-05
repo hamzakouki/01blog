@@ -17,17 +17,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        // Find user by username or email
+    public UserDetails loadUserByUsername(String usernameOrEmail) {
         User user = userRepository.findByUsername(usernameOrEmail)
-                .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found")));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Convert your User entity to Spring Security UserDetails
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())               // username
-                .password(user.getPassword())                  // hashed password
-                .roles(user.getRole().name())                  // role from enum
-                .build();
+        // ✅ Returns YOUR custom UserDetails (with full User entity)
+        return new UserPrincipal(user);
     }
 }
