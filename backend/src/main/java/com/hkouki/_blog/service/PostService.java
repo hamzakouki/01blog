@@ -6,6 +6,8 @@ import com.hkouki._blog.entity.Post;
 import com.hkouki._blog.entity.User;
 import com.hkouki._blog.exception.ResourceNotFoundException;
 import com.hkouki._blog.repository.PostRepository;
+import com.hkouki._blog.repository.CommentRepository;
+import com.hkouki._blog.repository.LikeRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,11 +21,20 @@ public class PostService {
     private final PostRepository postRepository;
     private final MediaService mediaService;
     private final UserService userService;
+    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
 
-    public PostService(PostRepository postRepository, MediaService mediaService, UserService userService) {
+    public PostService(
+            PostRepository postRepository, 
+            MediaService mediaService, 
+            UserService userService,
+            CommentRepository commentRepository,
+            LikeRepository likeRepository) {
         this.postRepository = postRepository;
         this.mediaService = mediaService;
         this.userService = userService;
+        this.commentRepository = commentRepository;
+        this.likeRepository = likeRepository;
     }
 
     // Create a post with optional media upload
@@ -104,6 +115,9 @@ public class PostService {
 
     // change post type into post response
     public PostResponse mapToPostResponse(Post post) {
+        long commentCount = commentRepository.countByPost(post);
+        long likeCount = likeRepository.countByPost(post);
+        
         return PostResponse.builder()
                 .id(post.getId())
                 .content(post.getContent())
@@ -112,6 +126,8 @@ public class PostService {
                 .authorUsername(post.getAuthor().getUsername())
                 .authorRole(post.getAuthor().getRole().name())
                 .createdAt(post.getCreatedAt())
+                .commentCount(commentCount)
+                .likeCount(likeCount)
                 .build();
     }
 }
