@@ -1,12 +1,22 @@
 import { Routes } from '@angular/router';
+
 import { Login } from './auth/login/login';
 import { Register } from './auth/register/register';
-import { Home } from './home/home'; // create this later
+import { Home } from './home/home';
+
+import { authGuard } from './auth/guards/auth.guard';
+import { adminGuard } from './auth/guards/admin.guard';
+
+// (admin component later)
+// import { AdminDashboard } from './admin/admin';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' }, // default route goes to home
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'home', component: Home }, // create later
-  { path: '**', redirectTo: '/login' } // fallback
+
+  { path: '', component: Home, canActivate: [authGuard] },
+
+  // { path: 'admin', component: AdminDashboard, canActivate: [authGuard, adminGuard] },
+
+  { path: '**', redirectTo: '' }
 ];

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,11 @@ export class Login {
   error = signal('');
   loading = signal(false);
 
-  constructor(private http: HttpClient, private router: Router) {}
+constructor(
+  private http: HttpClient,
+  private router: Router,
+  private auth: AuthService
+) {}
 
   login() {
     this.error.set('');
@@ -40,15 +45,15 @@ export class Login {
         this.loading.set(false);
         if (res?.data?.token) {
           console.log(res);
-          localStorage.setItem('token', res.data.token);
-          this.router.navigate(['/home']);
+          this.auth.setToken(res.data.token);
+          this.router.navigate(['/']);
         } else {
           this.error.set(res?.message || 'Login failed');
         }
       },
       error: (err) => {
         this.loading.set(false);
-        if (err.error?.message  ===  "Validation failed"){
+        if (err.error?.message === "Validation failed") {
           this.error.set('Please provide valid email and password');
           return;
         }

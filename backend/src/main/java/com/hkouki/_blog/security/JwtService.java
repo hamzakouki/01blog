@@ -14,6 +14,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import com.hkouki._blog.entity.Role;
 
 @Service
 public class JwtService {
@@ -27,8 +28,9 @@ public class JwtService {
     // ==============================
     // Generate Token
     // ==============================
-    public String generateToken(String username) {
+    public String generateToken(Role role, String username) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         return createToken(claims, username);
     }
 
