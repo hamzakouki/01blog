@@ -16,16 +16,16 @@
 
       <div class="form-floating mb-3 animate-input">
         <input
-          type="email"
+          type="text"
           class="form-control"
-          id="email"
+          id="identifier"
           placeholder="name@example.com"
-          [ngModel]="email()"
-          (ngModelChange)="email.set($event)"
-          name="email"
+          [ngModel]="identifier()"
+          (ngModelChange)="identifier.set($event)"
+          name="identifier"
           required
         />
-        <label for="email">Email address</label>
+        <label for="identifier">Email or username</label>
       </div>
 
       <div class="form-floating mb-3 animate-input delay-1">

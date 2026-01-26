@@ -1,0 +1,13 @@
+.home-container {
+    max-width: 800px;
+    margin: 2rem auto;
+  }
+  
+  .create-post-card {
+    border-radius: 1rem;
+  }
+  
+  .post-card {
+    border-radius: 1rem;
+  }
+  

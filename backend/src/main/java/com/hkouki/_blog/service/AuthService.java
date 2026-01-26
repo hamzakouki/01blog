@@ -22,8 +22,8 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     public AuthService(UserRepository userRepository,
-                       JwtService jwtService,
-                       BCryptPasswordEncoder passwordEncoder) {
+            JwtService jwtService,
+            BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
@@ -56,14 +56,25 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+        String identifier = request.getIdentifier();
 
+        User user;
+
+        if (identifier.contains("@")) {
+            // Login with email
+            user = userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+        } else {
+            // Login with username
+            // System.out.println("=======================================");
+            user = userRepository.findByUsername(identifier)
+                    .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+        }
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getRole(), user.getUsername());
+        String token = jwtService.generateToken(user.getId(), user.getRole(), user.getUsername());
         return new LoginResponse(token);
     }
 }

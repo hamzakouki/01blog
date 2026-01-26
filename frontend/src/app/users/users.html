@@ -1,0 +1,110 @@
+<div class="container py-4">
+  <!-- Success message -->
+<div *ngIf="successMessage()" class="alert alert-success alert-dismissible fade show">
+  {{ successMessage() }}
+</div>
+  <h3 class="mb-3">All Users</h3>
+
+  <!-- Search -->
+  <input
+    type="text"
+    class="form-control mb-3"
+    placeholder="Search users..."
+    [ngModel]="searchTerm()"
+    (ngModelChange)="searchTerm.set($event)"
+  />
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="text-center text-muted">
+    Loading users...
+  </div>
+
+  <!-- Users list -->
+  <div *ngFor="let user of filteredUsers()" class="card mb-2 p-2 d-flex flex-row justify-content-between align-items-center">
+    <div>
+      <strong>{{ user.username }}</strong>
+      <div class="text-muted small">{{ user.email }}</div>
+    </div>
+
+    <div>
+      <!-- Follow -->
+      <button
+        *ngIf="user.id !== auth.userId() && !user.isFollowing"
+        class="btn btn-sm btn-primary me-1"
+        (click)="follow(user)">
+        Follow
+      </button>
+
+      <!-- Unfollow -->
+      <button
+        *ngIf="user.id !== auth.userId() && user.isFollowing"
+        class="btn btn-sm btn-warning me-1"
+        (click)="unfollow(user)">
+        Unfollow
+      </button>
+
+      <!-- Report -->
+      <button
+      *ngIf="user.role !== 'ADMIN'"
+        class="btn btn-sm btn-danger"
+        (click)="openReportModal(user)">
+        Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading() && filteredUsers().length === 0" class="text-center text-muted">
+    No users found
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade show d-block" *ngIf="reportingUser()">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Report {{ reportingUser()?.username }}
+        </h5>
+        <button class="btn-close" (click)="reportingUser.set(null)"></button>
+      </div>
+
+      <div class="modal-body">
+        <textarea
+          class="form-control"
+          rows="4"
+          placeholder="Explain the reason..."
+          [ngModel]="reportReason()"
+          (ngModelChange)="reportReason.set($event)">
+        </textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="reportingUser.set(null)">
+          Cancel
+        </button>
+        <button class="btn btn-danger" (click)="submitReport()">
+          Report
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<app-confirm-dialog
+  *ngIf="pendingReport()"
+  title="Confirm Report"
+  [message]="'Are you sure you want to report ' + pendingReport()?.username + '?'"
+  confirmText="Yes, Report"
+  (confirm)="sendReport()"
+  (cancel)="pendingReport.set(null)">
+</app-confirm-dialog>
+
+
+
+<!-- Modal backdrop -->
+<!-- <div class="modal-backdrop fade show" *ngIf="reportingUser()"></div> -->

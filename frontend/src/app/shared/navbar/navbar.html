@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
+    <a class="navbar-brand fw-bold" routerLink="/">01Blog</a>
+  
+    <ul class="navbar-nav me-auto gap-2">
+      <li class="nav-item">
+        <a routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Home</a>
+      </li>
+    
+      <li class="nav-item">
+        <a routerLink="/users" routerLinkActive="active-link" class="nav-link">Users</a>
+      </li>
+    
+      <li class="nav-item">
+        <a routerLink="/notifications" routerLinkActive="active-link" class="nav-link">Notifications</a>
+      </li>
+    
+      <li class="nav-item">
+        <a routerLink="/profile" routerLinkActive="active-link" class="nav-link">Profile</a>
+      </li>
+    
+      <li class="nav-item" *ngIf="auth.role() === 'ADMIN'">
+        <a routerLink="/admin" routerLinkActive="active-link" class="nav-link">Dashboard</a>
+      </li>
+    </ul>
+    
+  
+    <button class="btn btn-outline-light btn-sm" (click)="logout()">
+      Logout
+    </button>
+  </nav>
+  

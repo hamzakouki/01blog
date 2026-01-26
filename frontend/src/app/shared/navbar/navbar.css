@@ -1,0 +1,30 @@
+.navbar {
+    animation: slideDown 0.4s ease;
+  }
+
+  /* Default link */
+.nav-link {
+  color: #ccc;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+/* Active link */
+.active-link {
+  color: #fff;
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.25rem;
+}
+
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

@@ -1,10 +1,12 @@
 package com.hkouki._blog.controller;
 
 import com.hkouki._blog.dto.ApiResponse;
+import com.hkouki._blog.dto.UserSummaryResponse;
 import com.hkouki._blog.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -14,6 +16,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<?>> getAllUsers() {
+        List<UserSummaryResponse> users = userService.getAllUsers();
+        return ResponseEntity.ok(new ApiResponse<>("success", users, "Users retrieved successfully"));
     }
     
     @PutMapping("/ban/{userId}")

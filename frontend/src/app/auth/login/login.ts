@@ -14,7 +14,7 @@ import { AuthService } from '../services/auth.service';
 })
 export class Login {
 
-  email = signal('');
+  identifier = signal('');
   password = signal('');
   error = signal('');
   loading = signal(false);
@@ -29,8 +29,8 @@ constructor(
     this.error.set('');
 
     // 1️⃣ Validate fields
-    if (!this.email() || !this.password()) {
-      this.error.set('Email and password are required');
+    if (!this.identifier() || !this.password()) {
+      this.error.set('identifier and password are required');
       return;
     }
 
@@ -38,13 +38,13 @@ constructor(
 
     // 2️⃣ Call backend
     this.http.post('http://localhost:8080/api/auth/login', {
-      email: this.email(),
+      identifier: this.identifier(),
       password: this.password()
     }).subscribe({
       next: (res: any) => {
         this.loading.set(false);
         if (res?.data?.token) {
-          console.log(res);
+          // console.log(res);
           this.auth.setToken(res.data.token);
           this.router.navigate(['/']);
         } else {
@@ -54,10 +54,10 @@ constructor(
       error: (err) => {
         this.loading.set(false);
         if (err.error?.message === "Validation failed") {
-          this.error.set('Please provide valid email and password');
+          this.error.set('Please provide valid identifier and password');
           return;
         }
-        this.error.set(err.error?.message || 'Invalid email or password');
+        this.error.set(err.error?.message || 'Invalid identifier or password');
       }
     });
   }

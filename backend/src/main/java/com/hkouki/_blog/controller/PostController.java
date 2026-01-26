@@ -24,6 +24,7 @@ public class PostController {
     // Create a new post
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @ModelAttribute PostRequest request) throws Exception {
+        // System.out.println("==================");
         PostResponse post = postService.createPost(request);
         return ResponseEntity.ok(new ApiResponse<>("success", post, "Post created successfully"));
     }
@@ -39,6 +40,7 @@ public class PostController {
     // Get all posts (feed)
     @GetMapping("/feed")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getFeed() {
+        // System.out.println("====================alooooooo======================");
         List<PostResponse> posts = postService.getFeed();
         return ResponseEntity.ok(new ApiResponse<>("success", posts, "Feed retrieved successfully"));
     }

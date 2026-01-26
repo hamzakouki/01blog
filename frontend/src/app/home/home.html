@@ -1,1 +1,48 @@
-<p>home works!</p>
+<div class="home-container">
+
+    <!-- Create Post -->
+    <div class="card mb-4 p-3 shadow-sm create-post-card">
+      <textarea
+        class="form-control mb-2"
+        placeholder="What's on your mind?"
+        [(ngModel)]="newPostContent"
+        rows="3"
+      ></textarea>
+  
+      <input type="file" (change)="onFileChange($event)" class="form-control mb-2"/>
+  
+      <button class="btn btn-primary" (click)="createPost()" [disabled]="loadingPost">
+        {{ loadingPost ? 'Posting...' : 'Post' }}
+      </button>
+    </div>
+  
+    <!-- Feed -->
+    <div *ngFor="let post of posts()" class="card mb-3 shadow-sm post-card">
+      <div class="card-body">
+        <h6 class="fw-bold">{{ post.authorUsername }} <small class="text-muted">{{ post.createdAt | date:'short' }}</small></h6>
+        <p>{{ post.content }}</p>
+  
+        <div *ngIf="post.mediaUrl">
+          <img *ngIf="post.mediaUrl.endsWith('.jpg')" [src]="post.mediaUrl" class="img-fluid rounded mb-2"/>
+          <video *ngIf="post.mediaUrl.endsWith('.mp4')" [src]="post.mediaUrl" controls class="w-100 mb-2"></video>
+        </div>
+  
+        <div class="d-flex gap-3">
+          <button class="btn btn-sm btn-outline-primary" (click)="toggleLike(post)">
+            Like ({{ post.likeCount }})
+          </button>
+  
+          <button class="btn btn-sm btn-outline-secondary" (click)="toggleComments(post)">
+            Comments ({{ post.commentCount }})
+          </button>
+        </div>
+  
+        <div *ngIf="post.showComments" class="mt-2">
+          <!-- Comments will go here -->
+        </div>
+  
+      </div>
+    </div>
+  
+  </div>
+  

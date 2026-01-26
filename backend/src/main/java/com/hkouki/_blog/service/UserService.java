@@ -1,11 +1,14 @@
 package com.hkouki._blog.service;
 
+import com.hkouki._blog.dto.UserSummaryResponse;
 import com.hkouki._blog.entity.User;
 import com.hkouki._blog.exception.InvalidPrincipalException;
 import com.hkouki._blog.exception.ResourceNotFoundException;
 import com.hkouki._blog.exception.UnauthenticatedException;
 import com.hkouki._blog.repository.UserRepository;
 import com.hkouki._blog.security.UserPrincipal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.NonNull;
 
@@ -21,6 +24,19 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    // get all users
+
+    public List<UserSummaryResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> UserSummaryResponse.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .role(user.getRole().name())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     /**
