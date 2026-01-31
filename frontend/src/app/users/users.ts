@@ -42,6 +42,8 @@ export class Users {
     // 🔁 React when userId becomes available
     effect(() => {
       const currentUserId = this.auth.userId();
+      // console.log('Current User ID:', currentUserId);
+      
       if (!currentUserId) return;
 
       this.fetchUsers(currentUserId);
@@ -56,7 +58,7 @@ export class Users {
       .subscribe({
         next: res => {
           const users = res.data
-            .filter(u => u.id !== currentUserId) // 🚀 remove current user
+            .filter(u => u.id !== currentUserId ) // 🚀 remove current user
             .map(u => ({
               ...u,
               isFollowing: false
@@ -68,6 +70,7 @@ export class Users {
 
           // Load follow status
           users.forEach(user => {
+            
             if (user.id === currentUserId) return;
 
             this.http
@@ -110,6 +113,7 @@ export class Users {
 
   openReportModal(user: User) {
     this.reportingUser.set(user);
+    // console.log('Reporting user:', user);
     this.reportReason.set('');
   }
 

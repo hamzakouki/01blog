@@ -45,7 +45,7 @@
 
       <!-- Report -->
       <button
-      *ngIf="user.role !== 'ADMIN'"
+      *ngIf="user.role !== 'ADMIN'  && !isAdmin()"
         class="btn btn-sm btn-danger"
         (click)="openReportModal(user)">
         Report
