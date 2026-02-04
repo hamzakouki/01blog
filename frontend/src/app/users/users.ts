@@ -43,7 +43,7 @@ export class Users {
     effect(() => {
       const currentUserId = this.auth.userId();
       // console.log('Current User ID:', currentUserId);
-      
+
       if (!currentUserId) return;
 
       this.fetchUsers(currentUserId);
@@ -58,7 +58,7 @@ export class Users {
       .subscribe({
         next: res => {
           const users = res.data
-            .filter(u => u.id !== currentUserId ) // 🚀 remove current user
+            .filter(u => u.id !== currentUserId) // 🚀 remove current user
             .map(u => ({
               ...u,
               isFollowing: false
@@ -70,7 +70,7 @@ export class Users {
 
           // Load follow status
           users.forEach(user => {
-            
+
             if (user.id === currentUserId) return;
 
             this.http
@@ -120,14 +120,14 @@ export class Users {
   submitReport() {
     const user = this.reportingUser();
     if (!user || !this.reportReason()) return;
-  
+
     // ✅ CLOSE report modal FIRST
     this.reportingUser.set(null);
-  
+
     // ✅ THEN open confirmation
     this.pendingReport.set(user);
   }
-  
+
   //===================================
 
 
@@ -145,17 +145,18 @@ export class Users {
   sendReport() {
     const user = this.pendingReport();
     if (!user) return;
-  
+
     this.http.post('http://localhost:8080/api/reports/create', {
       reportedUserId: user.id,
+      postId: null,
       reason: this.reportReason()
     }).subscribe(() => {
       this.pendingReport.set(null);
       this.reportingUser.set(null);
       this.successMessage.set('User reported successfully');
-  
+
       setTimeout(() => this.successMessage.set(null), 3000);
     });
   }
-  
+
 }

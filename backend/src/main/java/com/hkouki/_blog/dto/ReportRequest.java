@@ -1,13 +1,14 @@
 package com.hkouki._blog.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class ReportRequest {
-    @NotNull(message = "Reported user ID is required")
-    private Long reportedUserId;
+
+    private Long reportedUserId; // nullable
+    private Long postId;         // nullable
+
     @NotBlank(message = "Reason is required")
     private String reason;
 }

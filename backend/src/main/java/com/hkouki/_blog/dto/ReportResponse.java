@@ -18,6 +18,9 @@ public class ReportResponse {
     // reporter info
     private Long reporterId;
     private String reporterUsername;
+    
+    // reported post info
+    private Long reportedPostId;
 
     private String reason;
     private boolean handled;
