@@ -83,7 +83,7 @@ public class ReportService {
             // You will add PostRepository later
             Post post = postRepository.findById(request.getPostId())
             .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
-            report.setPost(post);
+            report.setReportedPost(post);
         }
 
         Report savedReport = reportRepository.save(report);
