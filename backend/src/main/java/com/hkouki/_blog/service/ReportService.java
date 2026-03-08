@@ -11,6 +11,7 @@ import com.hkouki._blog.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.hkouki._blog.entity.Post;
+import java.util.Objects;
 
 @Service
 public class ReportService {
@@ -68,8 +69,9 @@ public class ReportService {
 
         // ===== USER REPORT =====
         if (hasUser) {
-            User reportedUser = userRepository.findById(request.getReportedUserId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            User reportedUser = userRepository.findById(
+                Objects.requireNonNull(request.getReportedUserId()))
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
             if (reporter.getId().equals(reportedUser.getId())) {
                 throw new IllegalArgumentException("You cannot report yourself");
@@ -81,7 +83,8 @@ public class ReportService {
         // ===== POST REPORT =====
         if (hasPost) {
             // You will add PostRepository later
-            Post post = postRepository.findById(request.getPostId())
+            Post post = postRepository.findById(
+                Objects.requireNonNull(request.getPostId()))
             .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
             report.setReportedPost(post);
         }
@@ -108,8 +111,12 @@ public class ReportService {
                 .id(report.getId())
                 .reporterId(report.getReporter().getId())
                 .reporterUsername(report.getReporter().getUsername())
+    
                 .reportedUserId(report.getReportedUser() != null ? report.getReportedUser().getId() : null)
                 .reportedUsername(report.getReportedUser() != null ? report.getReportedUser().getUsername() : null)
+    
+                .reportedPostId(report.getReportedPost() != null ? report.getReportedPost().getId() : null)
+    
                 .reason(report.getReason())
                 .handled(report.isHandled())
                 .createdAt(report.getCreatedAt())
