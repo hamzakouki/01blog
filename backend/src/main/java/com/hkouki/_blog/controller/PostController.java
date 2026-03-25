@@ -21,6 +21,13 @@ public class PostController {
         this.postService = postService;
     }
 
+    // update post
+    @PutMapping("/update/{postId}")
+    public ResponseEntity<ApiResponse<PostResponse>> updatePost(@PathVariable Long postId, @Valid @ModelAttribute PostRequest request) throws Exception {
+        PostResponse post = postService.updatePost(postId, request);
+        return ResponseEntity.ok(new ApiResponse<>("success", post, "Post updated successfully"));
+    }
+
     // Create a new post
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @ModelAttribute PostRequest request) throws Exception {
@@ -35,6 +42,8 @@ public class PostController {
         PostResponse post = postService.getPostById(postId);
         return ResponseEntity.ok(new ApiResponse<>("success", post, "Post retrieved successfully"));
     }
+
+    
 
 
     // Get all posts (feed)
@@ -74,4 +83,6 @@ public class PostController {
         postService.deletePost(postId);
         return ResponseEntity.ok(new ApiResponse<>("success", postId.toString(), "Post "+postId+" deleted successfully"));
     }
+
+
 }

@@ -2,6 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { RouterModule } from '@angular/router'; // ✅ ADD THIS
+
+interface Comment {
+  id: number;
+  content: string;
+  authorUsername: string;
+  createdAt: string;
+}
 
 interface Post {
   id: number;
@@ -9,11 +17,13 @@ interface Post {
   mediaUrl?: string;
   authorId: number;
   authorUsername: string;
-  authorRole: string;
   createdAt: string;
   likeCount: number;
   commentCount: number;
+
   showComments?: boolean;
+  comments?: Comment[];
+  newComment?: string;
 }
 
 @Component({
@@ -21,13 +31,14 @@ interface Post {
   standalone: true,
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
-  imports: [CommonModule, FormsModule, HttpClientModule, DatePipe]
+  imports: [CommonModule, FormsModule, HttpClientModule, DatePipe, RouterModule ]
 })
 export class Home {
 
   private http = inject(HttpClient);
 
   posts = signal<Post[]>([]);
+
   newPostContent = '';
   newPostFile?: File;
   loadingPost = false;
@@ -36,50 +47,111 @@ export class Home {
     this.loadFeed();
   }
 
+  // 📰 FEED (from followed users)
   loadFeed() {
-    this.http.get<{ data: Post[] }>('http://localhost:8080/api/posts/feed').subscribe({
-      next: res => this.posts.set(res.data),
-      error: err => console.error(err)
-    });
-  }
-
-  onFileChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    this.newPostFile = target.files?.[0];
-  }
-
-  createPost() {
-    if (!this.newPostContent && !this.newPostFile) return;
-
-    this.loadingPost = true;
-    const formData = new FormData();
-    formData.append('content', this.newPostContent);
-    if (this.newPostFile) formData.append('media', this.newPostFile);
-
-    this.http.post<{ data: Post }>('http://localhost:8080/api/posts/create', formData)
+    this.http
+      .get<{ data: Post[] }>('http://localhost:8080/api/posts/feed')
       .subscribe({
-        next: res => {
-          this.loadingPost = false;
-          this.posts.update(p => [res.data, ...p]);
-          this.newPostContent = '';
-          this.newPostFile = undefined;
-        },
-        error: err => {
-          this.loadingPost = false;
-          console.error(err);
-        }
+        next: res => this.posts.set(res.data),
+        error: err => console.error(err)
       });
   }
 
+  // 📁 FILE SELECT
+  onFileChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.newPostFile = input.files?.[0];
+  }
+
+  // ✍️ CREATE POST
+  createPost() {
+
+    if (!this.newPostContent && !this.newPostFile) return;
+
+    this.loadingPost = true;
+
+    const formData = new FormData();
+    formData.append('content', this.newPostContent);
+
+    if (this.newPostFile) {
+      formData.append('media', this.newPostFile);
+    }
+
+    this.http.post<{ data: Post }>(
+      'http://localhost:8080/api/posts/create',
+      formData
+    ).subscribe({
+      next: res => {
+        this.posts.update(p => [res.data, ...p]);
+
+        this.newPostContent = '';
+        this.newPostFile = undefined;
+        this.loadingPost = false;
+      },
+      error: err => {
+        this.loadingPost = false;
+        console.error(err);
+      }
+    });
+  }
+
+  // 👍 LIKE
   toggleLike(post: Post) {
-    this.http.post(`http://localhost:8080/api/likes/${post.id}`, {}).subscribe({
-      next: () => this.loadFeed(), // Simple refresh for now
+    this.http.post(`http://localhost:8080/api/likes/${post.id}`, {})
+      .subscribe({
+        next: () => {
+          post.likeCount++;
+          this.posts.set([...this.posts()]);
+        },
+        error: err => console.error(err)
+      });
+  }
+
+  // 💬 TOGGLE COMMENTS
+  toggleComments(post: Post) {
+    post.showComments = !post.showComments;
+
+    if (post.showComments && !post.comments) {
+      this.http
+        .get<{ data: Comment[] }>(
+          `http://localhost:8080/api/comments/post/${post.id}`
+        )
+        .subscribe({
+          next: res => {
+            post.comments = res.data;
+            this.posts.set([...this.posts()]);
+          },
+          error: err => console.error(err)
+        });
+    }
+
+    this.posts.set([...this.posts()]);
+  }
+
+  // ➕ ADD COMMENT
+  addComment(post: Post) {
+
+    if (!post.newComment) return;
+
+    this.http.post<{ data: Comment }>(
+      'http://localhost:8080/api/comments/create',
+      {
+        postId: post.id,
+        content: post.newComment
+      }
+    ).subscribe({
+      next: res => {
+
+        if (!post.comments) post.comments = [];
+
+        post.comments.push(res.data);
+        post.commentCount++;
+
+        post.newComment = '';
+        this.posts.set([...this.posts()]);
+      },
       error: err => console.error(err)
     });
   }
 
-  toggleComments(post: Post) {
-    post.showComments = !post.showComments;
-    this.posts.set([...this.posts()]);
-  }
 }

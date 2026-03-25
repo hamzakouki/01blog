@@ -1,0 +1,8 @@
+.card {
+    border-radius: 10px;
+  }
+  
+  img, video {
+    max-height: 400px;
+    object-fit: cover;
+  }

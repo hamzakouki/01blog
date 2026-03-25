@@ -3,20 +3,25 @@ import { Injectable, signal, computed } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
+  // private reactive token
+  private tokenSignal = signal<string | null>(localStorage.getItem('token'));
+
   constructor() {
     const token = localStorage.getItem('token');
     if (token) {
       this.tokenSignal.set(token);
-  
-      // auto logout if already expired
+
+      // auto logout if token expired
       if (!this.isLoggedIn()) {
         this.logout();
       }
     }
   }
-  
 
-  private tokenSignal = signal<string | null>(localStorage.getItem('token'));
+  // ✅ Public getter for the current token
+  get token(): string | null {
+    return this.tokenSignal();
+  }
 
   // Decoded user info from JWT
   user = computed(() => {
@@ -32,27 +37,25 @@ export class AuthService {
   userId = computed(() => this.user()?.id ?? null);
 
   // Check if logged in
-  // isLoggedIn = computed(() => !!this.user());
   isLoggedIn = computed(() => {
     const token = this.tokenSignal();
     if (!token) return false;
-  
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isExpired = Date.now() >= payload.exp * 1000;
-  
+
       if (isExpired) {
         this.logout(); // auto-clean expired token
         return false;
       }
-  
+
       return true;
     } catch {
       this.logout();
       return false;
     }
   });
-  
 
   // Set token after login
   setToken(token: string) {
@@ -66,6 +69,7 @@ export class AuthService {
     this.tokenSignal.set(null);
   }
 
+  // Decode JWT payload
   private decodeToken(token: string): any {
     try {
       const payload = token.split('.')[1];

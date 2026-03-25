@@ -9,9 +9,9 @@ import com.hkouki._blog.repository.NotificationRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Service
 public class NotificationService {
@@ -19,9 +19,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserService userService;
 
-    public NotificationService(
-            NotificationRepository notificationRepository,
-            UserService userService) {
+    public NotificationService(NotificationRepository notificationRepository, UserService userService) {
         this.notificationRepository = notificationRepository;
         this.userService = userService;
     }

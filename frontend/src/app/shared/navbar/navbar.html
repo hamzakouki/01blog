@@ -7,11 +7,27 @@
       </li>
     
       <li class="nav-item">
-        <a routerLink="/users" routerLinkActive="active-link" class="nav-link">Users</a>
+        <a
+        routerLink="/users"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link">
+        Users
+      </a>
       </li>
     
       <li class="nav-item">
-        <a routerLink="/notifications" routerLinkActive="active-link" class="nav-link">Notifications</a>
+        <a routerLink="/notifications" routerLinkActive="active-link" class="nav-link position-relative">
+          Notifications
+        
+          <span
+            *ngIf="unreadCount() > 0"
+            class="badge bg-danger ms-1"
+          >
+            {{ unreadCount() }}
+          </span>
+        
+        </a>
       </li>
     
       <li class="nav-item">

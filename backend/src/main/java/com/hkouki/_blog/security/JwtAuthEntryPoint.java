@@ -19,11 +19,11 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException) throws IOException {
 
+            // System.out.println( "=======--Unauthorized error: " + authException.getMessage() + " for request: " + request.getRequestURI());
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
 
-        ApiResponse<Void> apiResponse =
-                new ApiResponse<>("error", null, "Unauthorized or invalid token");
+        ApiResponse<Void> apiResponse = new ApiResponse<>("error", null, "Unauthorized or invalid token");
 
         new ObjectMapper().writeValue(response.getOutputStream(), apiResponse);
     }

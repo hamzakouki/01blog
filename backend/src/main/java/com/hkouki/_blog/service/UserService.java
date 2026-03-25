@@ -26,6 +26,17 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    //get user by id
+    public UserSummaryResponse getUserById(@NonNull Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        return UserSummaryResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .build();
+    }
     // get all users
 
     public List<UserSummaryResponse> getAllUsers() {

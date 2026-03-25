@@ -2,11 +2,13 @@ package com.hkouki._blog.service;
 
 import com.hkouki._blog.dto.PostRequest;
 import com.hkouki._blog.dto.PostResponse;
+import com.hkouki._blog.entity.Follower;
 import com.hkouki._blog.entity.Post;
 import com.hkouki._blog.entity.User;
 import com.hkouki._blog.exception.ResourceNotFoundException;
 import com.hkouki._blog.repository.PostRepository;
 import com.hkouki._blog.repository.CommentRepository;
+import com.hkouki._blog.repository.FollowerRepository;
 import com.hkouki._blog.repository.LikeRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.io.IOException;
+import com.hkouki._blog.dto.UserSummaryResponse;
 
 @Service
 public class PostService {
@@ -23,18 +26,48 @@ public class PostService {
     private final UserService userService;
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
+    private final FollowerService followerService;
+    private final NotificationService notificationService;
+    private final FollowerRepository followerRepository;
 
     public PostService(
-            PostRepository postRepository, 
-            MediaService mediaService, 
+            PostRepository postRepository,
+            MediaService mediaService,
             UserService userService,
             CommentRepository commentRepository,
-            LikeRepository likeRepository) {
+            LikeRepository likeRepository,
+            FollowerService followerService,
+            NotificationService notificationService,
+            FollowerRepository followerRepository) {
         this.postRepository = postRepository;
         this.mediaService = mediaService;
         this.userService = userService;
         this.commentRepository = commentRepository;
         this.likeRepository = likeRepository;
+        this.followerService = followerService;
+        this.notificationService = notificationService;
+        this.followerRepository = followerRepository;
+    }
+
+    // Update a post
+    public PostResponse updatePost(@NonNull Long postId, PostRequest request) throws IOException {
+        User currentUser = userService.getCurrentUser();
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
+        if (!post.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("ADMIN")) {
+            throw new ResourceNotFoundException("You do not have permission to update this post.");
+        }
+
+        post.setContent(request.getContent());
+        MultipartFile media = request.getMedia();
+        if (media != null && !media.isEmpty()) {
+            // Upload media to Cloudinary
+            String mediaUrl = mediaService.uploadFile(media);
+            post.setMediaUrl(mediaUrl);
+        }
+
+        Post updatedPost = postRepository.save(post);
+        return mapToPostResponse(updatedPost);
     }
 
     // Create a post with optional media upload
@@ -50,6 +83,9 @@ public class PostService {
 
         @SuppressWarnings("null")
         Post savedpost = postRepository.save(post);
+        // 🔔 Notify followers
+        notifyFollowers(savedpost, author);
+
         return mapToPostResponse(savedpost);
     }
 
@@ -117,7 +153,7 @@ public class PostService {
     public PostResponse mapToPostResponse(Post post) {
         long commentCount = commentRepository.countByPost(post);
         long likeCount = likeRepository.countByPost(post);
-        
+
         return PostResponse.builder()
                 .id(post.getId())
                 .content(post.getContent())
@@ -129,5 +165,21 @@ public class PostService {
                 .commentCount(commentCount)
                 .likeCount(likeCount)
                 .build();
+    }
+
+    // this method for notify followers when a new post is created
+    private void notifyFollowers(Post post, User author) {
+
+        List<Follower> followers = followerRepository.findByFollowing(author);
+
+        for (Follower follower : followers) {
+
+            notificationService.createNotification(
+                    follower.getFollower(),
+                    author.getUsername() + " published a new post",
+                    "NEW_POST",
+                    post,
+                    author);
+        }
     }
 }

@@ -20,6 +20,7 @@ public class FollowerController {
     // Follow a user
     @PostMapping("/{userId}")
     public ResponseEntity<ApiResponse<FollowerResponse>> followUser(@PathVariable Long userId) {
+        // System.out.println("Received follow request for userId: " + userId);
         FollowerResponse response = followerService.followUser(userId);
         return ResponseEntity.ok(new ApiResponse<>("success", response, "Successfully followed user"));
     }
@@ -57,13 +58,16 @@ public class FollowerController {
     // Get follower count
     @GetMapping("/{userId}/followers/count")
     public ResponseEntity<ApiResponse<Long>> getFollowerCount(@PathVariable Long userId) {
+        System.out.println("===========Received request for follower count of userId: " + userId);
         long count = followerService.getFollowerCount(userId);
+        // System.out.println("====***=======Follower count for userId " + userId + ": " + count);
         return ResponseEntity.ok(new ApiResponse<>("success", count, "Fetched follower count"));
     }
 
     // Get following count
     @GetMapping("/{userId}/following/count")
     public ResponseEntity<ApiResponse<Long>> getFollowingCount(@PathVariable Long userId) {
+        // System.out.println("===========Received request for follower count of userId: " + userId);
         long count = followerService.getFollowingCount(userId);
         return ResponseEntity.ok(new ApiResponse<>("success", count, "Fetched following count"));
     }

@@ -18,12 +18,20 @@ public class UserController {
         this.userService = userService;
     }
 
+    // =======================
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<UserSummaryResponse>> getUserById(@PathVariable Long userId) {
+        UserSummaryResponse user = userService.getUserById(userId);
+        return ResponseEntity.ok(new ApiResponse<>("success", user, "User retrieved successfully"));
+    }
+    // =======================
+
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<?>> getAllUsers() {
         List<UserSummaryResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(new ApiResponse<>("success", users, "Users retrieved successfully"));
     }
-    
+
     @PutMapping("/ban/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<String>> banUser(@PathVariable Long userId) {

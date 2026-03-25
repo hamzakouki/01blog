@@ -33,9 +33,9 @@ public class ReportService {
     }
 
     public ReportResponse[] getAllReports() {
-        return reportRepository.findAll().stream()
-                .filter(report -> !report.isHandled())
-                .map(report -> converter(report)).toArray(ReportResponse[]::new);
+        return reportRepository.findByHandledFalse().stream()
+                .map(this::converter)
+                .toArray(ReportResponse[]::new);
     }
 
     @Transactional

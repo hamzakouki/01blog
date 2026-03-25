@@ -43,9 +43,11 @@ constructor(
     }).subscribe({
       next: (res: any) => {
         this.loading.set(false);
+        // console.log('Login response:', res);
         if (res?.data?.token) {
           // console.log(res);
           this.auth.setToken(res.data.token);
+          // console.log('Token set in AuthService, localStorage now:', localStorage.getItem('token'));
           this.router.navigate(['/']);
         } else {
           this.error.set(res?.message || 'Login failed');

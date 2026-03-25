@@ -1,13 +1,43 @@
 .home-container {
-    max-width: 800px;
-    margin: 2rem auto;
-  }
-  
-  .create-post-card {
-    border-radius: 1rem;
-  }
-  
-  .post-card {
-    border-radius: 1rem;
-  }
-  
+  max-width: 750px;
+  margin: 2rem auto;
+}
+
+.create-post {
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.post-card {
+  border-radius: 12px;
+}
+
+.post-header {
+  font-size: 0.95rem;
+}
+
+.post-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: gray;
+  margin-bottom: 0.5rem;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.comments-section {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.comment {
+  background: #f7f7f7;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+}

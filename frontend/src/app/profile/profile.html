@@ -1,1 +1,94 @@
-<p>profile works!</p>
+<div class="container mt-4">
+
+  <!-- HEADER -->
+  <div class="card shadow-sm mb-4 p-3">
+    <h4>My Profile</h4>
+
+    <div class="d-flex gap-4">
+      <div>
+        <strong>{{ followerCount() }}</strong>
+        <div class="text-muted small">Followers</div>
+      </div>
+
+      <div>
+        <strong>{{ followingCount() }}</strong>
+        <div class="text-muted small">Following</div>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="mb-3">My Posts</h5>
+
+  <!-- LOADING -->
+  <div *ngIf="loading()">Loading...</div>
+
+  <!-- POSTS -->
+  <div *ngFor="let post of posts()" class="card shadow-sm mb-3">
+    <div class="card-body">
+
+      <!-- ✏️ EDIT MODE -->
+      <div *ngIf="editingPostId() === post.id; else viewMode">
+
+        <textarea
+          class="form-control mb-2"
+          [ngModel]="editedContent()"
+          (ngModelChange)="editedContent.set($event)">
+        </textarea>
+
+        <button class="btn btn-sm btn-success me-2"
+                (click)="saveEdit(post.id)">
+          Save
+        </button>
+
+        <button class="btn btn-sm btn-secondary"
+                (click)="cancelEdit()">
+          Cancel
+        </button>
+
+      </div>
+
+      <!-- 👁 VIEW MODE -->
+      <ng-template #viewMode>
+
+        <p>{{ post.content }}</p>
+
+        <div *ngIf="post.mediaUrl">
+          <img *ngIf="post.mediaUrl.includes('image')"
+               [src]="post.mediaUrl"
+               class="img-fluid rounded mb-2" />
+
+          <video *ngIf="post.mediaUrl.includes('video')"
+                 [src]="post.mediaUrl"
+                 controls
+                 class="w-100 mb-2">
+          </video>
+        </div>
+
+        <small class="text-muted">
+          {{ post.createdAt | date:'medium' }}
+        </small>
+
+        <div class="mt-2">
+          ❤️ {{ post.likeCount }} &nbsp;&nbsp;
+          💬 {{ post.commentCount }}
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="mt-2">
+          <button class="btn btn-sm btn-outline-primary me-2"
+                  (click)="startEdit(post)">
+            Edit
+          </button>
+
+          <button class="btn btn-sm btn-outline-danger"
+                  (click)="deletePost(post.id)">
+            Delete
+          </button>
+        </div>
+
+      </ng-template>
+
+    </div>
+  </div>
+
+</div>

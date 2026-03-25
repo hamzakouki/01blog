@@ -11,6 +11,7 @@ import { Users } from './users/users';
 import { Notifications } from './notifications/notifications';
 import { Profile } from './profile/profile';
 import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
+import { UserProfile } from './user-profile/user-profile';
 
 export const routes: Routes = [
 
@@ -29,6 +30,7 @@ export const routes: Routes = [
       { path: 'notifications', component: Notifications },
       { path: 'profile', component: Profile },
       { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
+      { path: 'users/:id', component: UserProfile },
     ]
   },
 

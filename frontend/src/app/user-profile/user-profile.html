@@ -1,0 +1,56 @@
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="card mb-4 p-3">
+        <h4>{{ user()?.username }}</h4>
+  
+      <div class="d-flex gap-4">
+        <div>
+          <strong>{{ followerCount() }}</strong>
+          <div class="text-muted small">Followers</div>
+        </div>
+  
+        <div>
+          <strong>{{ followingCount() }}</strong>
+          <div class="text-muted small">Following</div>
+        </div>
+      </div>
+  
+      <!-- 🚀 FUTURE FEATURE -->
+      <!-- <button class="btn btn-primary mt-2">Follow</button> -->
+  
+    </div>
+  
+    <h5>User Posts</h5>
+  
+    <!-- POSTS -->
+    <div *ngFor="let post of posts()" class="card mb-3">
+      <div class="card-body">
+  
+        <p>{{ post.content }}</p>
+  
+        <div *ngIf="post.mediaUrl">
+          <img *ngIf="post.mediaUrl.includes('image')"
+               [src]="post.mediaUrl"
+               class="img-fluid mb-2" />
+  
+          <video *ngIf="post.mediaUrl.includes('video')"
+                 [src]="post.mediaUrl"
+                 controls
+                 class="w-100 mb-2">
+          </video>
+        </div>
+  
+        <small class="text-muted">
+          {{ post.createdAt | date:'medium' }}
+        </small>
+  
+        <div class="mt-2">
+          ❤️ {{ post.likeCount }}
+          💬 {{ post.commentCount }}
+        </div>
+  
+      </div>
+    </div>
+  
+  </div>
