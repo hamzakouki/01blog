@@ -4,6 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router'; // ✅ ADD THIS
 
+
+interface ToggleLikeResponse {
+  status: string;
+  data: any | null;
+  message: string;
+}
+
 interface Comment {
   id: number;
   content: string;
@@ -97,10 +104,13 @@ export class Home {
 
   // 👍 LIKE
   toggleLike(post: Post) {
-    this.http.post(`http://localhost:8080/api/likes/${post.id}`, {})
+    this.http.post<ToggleLikeResponse>(`http://localhost:8080/api/likes/${post.id}`, {})
       .subscribe({
-        next: () => {
-          post.likeCount++;
+        next: (res) => {
+          console.log('Toggle like response:', res);
+  
+          post.likeCount += res.message === "Post liked successfully" ? 1 : -1;
+  
           this.posts.set([...this.posts()]);
         },
         error: err => console.error(err)

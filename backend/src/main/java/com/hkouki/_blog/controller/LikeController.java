@@ -23,6 +23,7 @@ public class LikeController {
      */
     @PostMapping("/{postId}")
     public ResponseEntity<ApiResponse<LikeResponse>> toggleLike(@PathVariable Long postId) {
+        
         LikeResponse like = likeService.toggleLike(postId);
         String message = like != null ? "Post liked successfully" : "Post unliked successfully";
         return ResponseEntity.ok(new ApiResponse<>("success", like, message));

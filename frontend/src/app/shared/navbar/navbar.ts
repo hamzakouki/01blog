@@ -1,8 +1,10 @@
-import { Component, inject, signal  } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AuthService } from '../../auth/services/auth.service';
+import { interval, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -11,7 +13,7 @@ import { AuthService } from '../../auth/services/auth.service';
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.css']
 })
-export class Navbar {
+export class Navbar implements OnInit, OnDestroy {
 
   auth = inject(AuthService);
   router = inject(Router);
@@ -19,14 +21,26 @@ export class Navbar {
 
   unreadCount = signal(0);
 
-  constructor() {
+  private destroy$ = new Subject<void>();
+
+  ngOnInit() {
+    // initial load
     this.loadUnreadCount();
-    setInterval(() => {
-      this.loadUnreadCount();
-    }, 30000);
+
+    // polling every 30s (ONLY while component is alive)
+    interval(30000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadUnreadCount();
+      });
   }
 
   loadUnreadCount() {
+    // 🚫 stop if user is not logged in
+    if (!this.auth.isLoggedIn()) {
+      this.unreadCount.set(0); // reset UI
+      return;
+    }
 
     this.http
       .get<{ data: { unreadCount: number } }>(
@@ -36,13 +50,29 @@ export class Navbar {
         next: res => {
           this.unreadCount.set(res.data.unreadCount);
         },
-        error: err => console.error(err)
-      });
+        error: err => {
+          // 🚫 ignore 401 (user logged out / token expired)
+          if (err.status === 401) return;
 
+          console.error(err);
+        }
+      });
   }
 
   logout() {
     this.auth.logout();
+
+    // stop all polling immediately
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    this.unreadCount.set(0);
+
     this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
