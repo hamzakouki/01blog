@@ -1,29 +1,25 @@
 <div class="container mt-4">
 
+  <!-- ✅ SUCCESS MESSAGE -->
+  <div *ngIf="successMessage()" class="alert alert-success">
+    {{ successMessage() }}
+  </div>
+
   <!-- ✍️ CREATE POST -->
   <div class="card shadow-sm mb-4 p-3">
 
-    <textarea
-      class="form-control mb-2"
-      placeholder="Share something..."
-      [(ngModel)]="newPostContent"
-      rows="3">
+    <textarea class="form-control mb-2" placeholder="Share something..." [(ngModel)]="newPostContent" rows="3">
     </textarea>
 
-    <input type="file"
-           (change)="onFileChange($event)"
-           class="form-control mb-2" />
+    <input type="file" (change)="onFileChange($event)" class="form-control mb-2" />
 
-    <button class="btn btn-primary"
-            (click)="createPost()"
-            [disabled]="loadingPost">
+    <button class="btn btn-primary" (click)="createPost()" [disabled]="loadingPost">
 
       {{ loadingPost ? 'Posting...' : 'Post' }}
 
     </button>
 
   </div>
-
 
   <!-- 📰 POSTS FEED -->
   <div *ngFor="let post of posts()" class="card mb-3 shadow-sm">
@@ -32,11 +28,8 @@
 
       <!-- 👤 AUTHOR -->
       <div class="mb-2">
-        <a class="fw-bold text-decoration-none"
-           [routerLink]="['/users', post.authorId]">
-
+        <a class="fw-bold text-decoration-none" [routerLink]="['/users', post.authorId]">
           {{ post.authorUsername }}
-
         </a>
 
         <small class="text-muted ms-2">
@@ -50,14 +43,9 @@
       <!-- MEDIA -->
       <div *ngIf="post.mediaUrl">
 
-        <img *ngIf="post.mediaUrl.includes('image')"
-             [src]="post.mediaUrl"
-             class="img-fluid rounded mb-2" />
+        <img *ngIf="post.mediaUrl.includes('image')" [src]="post.mediaUrl" class="img-fluid rounded mb-2" />
 
-        <video *ngIf="post.mediaUrl.includes('video')"
-               [src]="post.mediaUrl"
-               controls
-               class="w-100 rounded mb-2">
+        <video *ngIf="post.mediaUrl.includes('video')" [src]="post.mediaUrl" controls class="w-100 rounded mb-2">
         </video>
 
       </div>
@@ -69,14 +57,18 @@
 
       <!-- ACTIONS -->
       <div class="mb-2">
-        <button class="btn btn-sm btn-outline-primary me-2"
-                (click)="toggleLike(post)">
+        <button class="btn btn-sm btn-outline-primary me-2" (click)="toggleLike(post)">
           Like
         </button>
 
-        <button class="btn btn-sm btn-outline-secondary"
-                (click)="toggleComments(post)">
+        <button class="btn btn-sm btn-outline-secondary me-2" (click)="toggleComments(post)">
           Comment
+        </button>
+
+        <!-- 🚨 REPORT BUTTON -->
+        <button *ngIf="post.authorId !== auth.userId()" class="btn btn-sm btn-outline-danger"
+          (click)="openReportModal(post)">
+          Report
         </button>
       </div>
 
@@ -94,14 +86,9 @@
 
         <!-- ADD COMMENT -->
         <div class="d-flex mt-2">
-          <input
-            type="text"
-            class="form-control me-2"
-            [(ngModel)]="post.newComment"
-            placeholder="Write a comment..." />
+          <input type="text" class="form-control me-2" [(ngModel)]="post.newComment" placeholder="Write a comment..." />
 
-          <button class="btn btn-primary btn-sm"
-                  (click)="addComment(post)">
+          <button class="btn btn-primary btn-sm" (click)="addComment(post)">
             Send
           </button>
         </div>
@@ -113,3 +100,41 @@
   </div>
 
 </div>
+
+<!-- 🚨 REPORT POST MODAL -->
+<div class="modal fade show d-block" *ngIf="reportingPost()">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Report Post by {{ reportingPost()?.authorUsername }}
+        </h5>
+        <button class="btn-close" (click)="reportingPost.set(null)"></button>
+      </div>
+
+      <div class="modal-body">
+        <textarea class="form-control" rows="4" placeholder="Explain the reason..." [ngModel]="reportReason()"
+          (ngModelChange)="reportReason.set($event)">
+        </textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="reportingPost.set(null)">
+          Cancel
+        </button>
+
+        <button class="btn btn-danger" (click)="submitReport()">
+          Report
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ✅ CONFIRM DIALOG -->
+<app-confirm-dialog *ngIf="pendingReport()" title="Confirm Report"
+  [message]="'Are you sure you want to report this post?'" confirmText="Yes, Report" (confirm)="sendReport()"
+  (cancel)="pendingReport.set(null)">
+</app-confirm-dialog>

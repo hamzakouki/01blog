@@ -3,7 +3,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router'; // ✅ ADD THIS
-
+import { AuthService } from '../auth/services/auth.service';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog';
 
 interface ToggleLikeResponse {
   status: string;
@@ -38,7 +39,7 @@ interface Post {
   standalone: true,
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
-  imports: [CommonModule, FormsModule, HttpClientModule, DatePipe, RouterModule ]
+  imports: [CommonModule, FormsModule, HttpClientModule, DatePipe, RouterModule, ConfirmDialogComponent]
 })
 export class Home {
 
@@ -50,6 +51,13 @@ export class Home {
   newPostFile?: File;
   loadingPost = false;
 
+  //======================this is for report ===============
+  auth = inject(AuthService);
+  reportingPost = signal<Post | null>(null);
+  reportReason = signal('');
+  pendingReport = signal<Post | null>(null);
+  successMessage = signal<string | null>(null);
+  //==================================================
   constructor() {
     this.loadFeed();
   }
@@ -108,9 +116,9 @@ export class Home {
       .subscribe({
         next: (res) => {
           console.log('Toggle like response:', res);
-  
+
           post.likeCount += res.message === "Post liked successfully" ? 1 : -1;
-  
+
           this.posts.set([...this.posts()]);
         },
         error: err => console.error(err)
@@ -163,5 +171,38 @@ export class Home {
       error: err => console.error(err)
     });
   }
+
+
+  //=================== methods for report =======================
+  openReportModal(post: Post) {
+    this.reportingPost.set(post);
+    this.reportReason.set('');
+  }
+
+  submitReport() {
+    const post = this.reportingPost();
+    if (!post || !this.reportReason()) return;
+
+    this.reportingPost.set(null); // close modal
+    this.pendingReport.set(post); // open confirm
+  }
+
+  sendReport() {
+    const post = this.pendingReport();
+    if (!post) return;
+
+    this.http.post('http://localhost:8080/api/reports/create', {
+      reportedUserId: null,
+      postId: post.id,
+      reason: this.reportReason()
+    }).subscribe(() => {
+      this.pendingReport.set(null);
+      this.successMessage.set('Post reported successfully');
+
+      setTimeout(() => this.successMessage.set(null), 3000);
+    });
+  }
+
+  //==============================================================
 
 }
