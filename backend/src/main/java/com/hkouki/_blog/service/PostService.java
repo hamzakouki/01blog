@@ -105,6 +105,7 @@ public class PostService {
         if (!post.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("ADMIN")) {
             throw new ResourceNotFoundException("You do not have permission to delete this post.");
         }
+        System.out.println(post + "==============hada howa post================");
         postRepository.delete(post);
     }
 
@@ -135,9 +136,9 @@ public class PostService {
 
     // Fetch all posts for feed (all posts)
     public List<PostResponse> getFeed() {
-        return postRepository.findAllByOrderByCreatedAtDesc()
+        return postRepository.findByHiddenFalseOrderByCreatedAtDesc() // only unhiden posts
                 .stream()
-                .map(post -> mapToPostResponse(post))
+                .map(this::mapToPostResponse)
                 .collect(Collectors.toList());
     }
 
@@ -181,5 +182,12 @@ public class PostService {
                     post,
                     author);
         }
+    }
+
+    // check if post is hidden
+    public boolean isPostHidde(@NonNull Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
+        return post.isHidden();
     }
 }

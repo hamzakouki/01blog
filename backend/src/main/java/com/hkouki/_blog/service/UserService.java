@@ -118,4 +118,11 @@ public class UserService {
         }
         userRepository.delete(user);
     }
+
+    // check if user is banned
+    public boolean isUserBanned(@NonNull Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return !user.isEnabled(); 
+    }
 }

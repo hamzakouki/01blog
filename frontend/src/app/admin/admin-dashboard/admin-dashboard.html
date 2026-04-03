@@ -1,1 +1,45 @@
-<p>admin-dashboard works!</p>
+<div class="container mt-4">
+  <h2>Admin Dashboard</h2>
+
+  <div *ngIf="loading()" class="alert alert-info">Loading reports...</div>
+  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
+
+  <div *ngIf="!loading() && reports().length === 0" class="alert alert-secondary">
+    No reports found.
+  </div>
+
+  <div class="reports">
+    <div *ngFor="let report of reports()" class="report-card card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Report #{{ report.id }}</h5>
+        <p class="mb-1"><strong>Reported by:</strong> {{ report.reporterUsername }} (ID: {{ report.reporterId }})</p>
+
+        <ng-container *ngIf="report.reportedUserId; else postBlock">
+          <p class="mb-1"><strong>Target user:</strong> {{ report.reportedUsername || 'unknown' }} (ID: {{ report.reportedUserId }})</p>
+          <p class="mb-1"><strong>Reason:</strong> {{ report.reason }}</p>
+          <div class="btn-group" role="group">
+            <button class="btn btn-danger" (click)="handleUser(report, 'delete')">Delete User</button>
+            <button class="btn btn-warning" (click)="handleUser(report, isUserBanned(report.reportedUserId) ? 'unban' : 'ban')">
+              {{ isUserBanned(report.reportedUserId) ? 'Unban User' : 'Ban User' }}
+            </button>
+          </div>
+          <small class="text-muted">  Ban status: {{ isUserBanned(report.reportedUserId) ? 'Banned' : 'Active' }}</small>
+        </ng-container>
+
+        <ng-template #postBlock>
+          <p class="mb-1"><strong>Target post:</strong> ID {{ report.reportedPostId}}</p>
+          <p class="mb-1"><strong>Reason:</strong> {{ report.reason }}</p>
+          <div class="btn-group" role="group">
+            <button class="btn btn-danger" (click)="handlePost(report, 'delete')">Delete Post</button>
+            <button class="btn btn-warning" (click)="handlePost(report, isPostHidden(report.reportedPostId) ? 'unhide' : 'hide')">
+              {{ isPostHidden(report.reportedPostId) ? 'Unhide Post' : 'Hide Post' }}
+            </button>
+          </div>
+          <small class="text-muted">  Post status: {{ isPostHidden(report.reportedPostId) ? 'Hidden' : 'Visible' }}</small>
+        </ng-template>
+
+        <p class="mt-2"><small>Submitted {{ timeAgo(report.createdAt) }}</small></p>
+      </div>
+    </div>
+  </div>
+</div>

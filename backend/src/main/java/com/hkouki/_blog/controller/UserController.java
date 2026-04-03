@@ -54,4 +54,12 @@ public class UserController {
         userService.deleteUser(userId);
         return ResponseEntity.ok(new ApiResponse<>("success", userId.toString(), "User deleted successfully"));
     }
+
+    //========= check if user ban =================
+    @GetMapping("/checkban/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Boolean>> checkIfUserBanned(@PathVariable Long userId) {
+        boolean isBanned = userService.isUserBanned(userId);
+        return ResponseEntity.ok(new ApiResponse<>("success", isBanned, "User ban status retrieved successfully"));
+    }
 }

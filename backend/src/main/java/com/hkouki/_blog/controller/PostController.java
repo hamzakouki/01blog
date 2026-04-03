@@ -84,5 +84,10 @@ public class PostController {
         return ResponseEntity.ok(new ApiResponse<>("success", postId.toString(), "Post "+postId+" deleted successfully"));
     }
 
-
+    //check if post is hidden
+    @GetMapping("/checkhidde/{postId}")
+    public ResponseEntity<ApiResponse<Boolean>> checkIfPostHidde(@PathVariable Long postId) {
+        boolean isHidde = postService.isPostHidde(postId);
+        return ResponseEntity.ok(new ApiResponse<>("success", isHidde, "Post hidden status retrieved successfully"));
+    }
 }
