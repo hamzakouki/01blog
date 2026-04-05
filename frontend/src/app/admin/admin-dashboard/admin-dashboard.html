@@ -1,44 +1,131 @@
 <div class="container mt-4">
-  <h2>Admin Dashboard</h2>
+  <h2>Admin Dashboard - Reports Management</h2>
 
-  <div *ngIf="loading()" class="alert alert-info">Loading reports...</div>
-  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
-
-  <div *ngIf="!loading() && reports().length === 0" class="alert alert-secondary">
-    No reports found.
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="alert alert-info">
+    <strong>Loading reports...</strong> Please wait while we fetch all pending reports for review.
   </div>
 
+  <!-- Error State -->
+  <div *ngIf="error()" class="alert alert-danger">
+    <strong>Error:</strong> {{ error() }}
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && reports().length === 0" class="alert alert-secondary">
+    <strong>No pending reports.</strong> All reports have been handled or there are no reports to review at this time.
+  </div>
+
+  <!-- Reports List -->
   <div class="reports">
     <div *ngFor="let report of reports()" class="report-card card mb-3">
       <div class="card-body">
-        <h5 class="card-title">Report #{{ report.id }}</h5>
-        <p class="mb-1"><strong>Reported by:</strong> {{ report.reporterUsername }} (ID: {{ report.reporterId }})</p>
+        <!-- Report Header -->
+        <h5 class="card-title">
+          <span>Report #{{ report.id }}</span>
+          <span class="text-muted">{{ timeAgo(report.createdAt) }}</span>
+        </h5>
+        <hr />
 
+        <!-- Reporter Info -->
+        <p class="mb-1">
+          <strong>Reported by:</strong> 
+          <span class="badge" style="background-color: #e9ecef; color: #495057;">
+            {{ report.reporterUsername }}
+          </span>
+        </p>
+
+        <!-- USER REPORT BLOCK -->
         <ng-container *ngIf="report.reportedUserId; else postBlock">
-          <p class="mb-1"><strong>Target user:</strong> {{ report.reportedUsername || 'unknown' }} (ID: {{ report.reportedUserId }})</p>
-          <p class="mb-1"><strong>Reason:</strong> {{ report.reason }}</p>
-          <div class="btn-group" role="group">
-            <button class="btn btn-danger" (click)="handleUser(report, 'delete')">Delete User</button>
-            <button class="btn btn-warning" (click)="handleUser(report, isUserBanned(report.reportedUserId) ? 'unban' : 'ban')">
-              {{ isUserBanned(report.reportedUserId) ? 'Unban User' : 'Ban User' }}
-            </button>
+          <div style="border-left: 3px solid #dc3545; padding-left: 15px; margin: 15px 0;">
+            <p class="mb-1">
+              <strong>Report Type:</strong> 
+              <span style="color: #dc3545; font-weight: 600;">👤 User Report</span>
+            </p>
+            <p class="mb-1">
+              <strong>Reported User:</strong> 
+              <span class="badge" style="background-color: #ffcdd2; color: #b71c1c;">
+                {{ report.reportedUsername || 'Unknown' }}
+              </span>
+            </p>
+            <p class="mb-2"><strong>Reason:</strong></p>
+            <p style="background-color: #f8f9fa; padding: 10px; border-radius: 4px; margin-bottom: 15px; border-left: 3px solid #ffc107; margin-top: 5px;">
+              "{{ report.reason }}"
+            </p>
+
+            <!-- User Action Buttons -->
+            <div class="btn-group" role="group">
+              <button 
+                class="btn btn-danger" 
+                (click)="handleUser(report, 'delete')"
+                title="Permanently delete this user and all their associated data">
+                🗑️ Delete User
+              </button>
+              <button 
+                class="btn" 
+                [ngClass]="isUserBanned(report.reportedUserId) ? 'btn-secondary' : 'btn-warning'"
+                (click)="handleUser(report, isUserBanned(report.reportedUserId) ? 'unban' : 'ban')"
+                [title]="isUserBanned(report.reportedUserId) ? 'Remove ban and restore user access' : 'Ban user and prevent platform access'">
+                <span>{{ isUserBanned(report.reportedUserId) ? '✓' : '⛔' }}</span>
+                {{ isUserBanned(report.reportedUserId) ? 'Unban User' : 'Ban User' }}
+              </button>
+            </div>
+
+            <!-- User Status Badge -->
+            <div style="margin-top: 8px;" *ngIf="report.handled" class="status-badge status-hidden">
+              Report handled ✓ (actions still available)
+            </div>
+            <div class="status-badge" [ngClass]="isUserBanned(report.reportedUserId) ? 'status-banned' : 'status-active'">
+              <strong>Current Status:</strong> {{ isUserBanned(report.reportedUserId) ? '🚫 BANNED' : '✓ ACTIVE' }}
+            </div>
           </div>
-          <small class="text-muted">  Ban status: {{ isUserBanned(report.reportedUserId) ? 'Banned' : 'Active' }}</small>
         </ng-container>
 
+        <!-- POST REPORT BLOCK -->
         <ng-template #postBlock>
-          <p class="mb-1"><strong>Target post:</strong> ID {{ report.reportedPostId}}</p>
-          <p class="mb-1"><strong>Reason:</strong> {{ report.reason }}</p>
-          <div class="btn-group" role="group">
-            <button class="btn btn-danger" (click)="handlePost(report, 'delete')">Delete Post</button>
-            <button class="btn btn-warning" (click)="handlePost(report, isPostHidden(report.reportedPostId) ? 'unhide' : 'hide')">
-              {{ isPostHidden(report.reportedPostId) ? 'Unhide Post' : 'Hide Post' }}
-            </button>
-          </div>
-          <small class="text-muted">  Post status: {{ isPostHidden(report.reportedPostId) ? 'Hidden' : 'Visible' }}</small>
-        </ng-template>
+          <div style="border-left: 3px solid #ffc107; padding-left: 15px; margin: 15px 0;">
+            <p class="mb-1">
+              <strong>Report Type:</strong> 
+              <span style="color: #ffc107; font-weight: 600;">📝 Post Report</span>
+            </p>
+            <p class="mb-1">
+              <strong>Reported Post:</strong> 
+              <span class="badge" style="background-color: #fff3cd; color: #856404;">
+                Post #{{ report.reportedPostId }}
+              </span>
+            </p>
+            <p class="mb-2"><strong>Reason:</strong></p>
+            <p style="background-color: #f8f9fa; padding: 10px; border-radius: 4px; margin-bottom: 15px; border-left: 3px solid #ffc107; margin-top: 5px;">
+              "{{ report.reason }}"
+            </p>
 
-        <p class="mt-2"><small>Submitted {{ timeAgo(report.createdAt) }}</small></p>
+            <!-- Post Action Buttons -->
+            <div class="btn-group" role="group">
+              <button 
+                class="btn btn-danger" 
+                (click)="handlePost(report, 'delete')"
+                title="Permanently delete this post from the platform">
+                🗑️ Delete Post
+              </button>
+              <button 
+                class="btn" 
+                [ngClass]="isPostHidden(report.reportedPostId) ? 'btn-secondary' : 'btn-warning'"
+                (click)="handlePost(report, isPostHidden(report.reportedPostId) ? 'unhide' : 'hide')"
+                [title]="isPostHidden(report.reportedPostId) ? 'Make post visible to all users' : 'Hide post from public view'">
+                <span>{{ isPostHidden(report.reportedPostId) ? '👁️' : '👁️‍🗨️' }}</span>
+                {{ isPostHidden(report.reportedPostId) ? 'Unhide Post' : 'Hide Post' }}
+              </button>
+            </div>
+
+            <!-- Post Status Badge -->
+            <div style="margin-top: 8px;" *ngIf="report.handled" class="status-badge status-hidden">
+              Report handled ✓ (actions still available)
+            </div>
+            <div class="status-badge" [ngClass]="isPostHidden(report.reportedPostId) ? 'status-hidden' : 'status-visible'">
+              <strong>Current Status:</strong> {{ isPostHidden(report.reportedPostId) ? '🙈 HIDDEN' : '👁️ VISIBLE' }}
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>

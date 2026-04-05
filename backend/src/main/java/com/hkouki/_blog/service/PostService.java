@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.io.IOException;
-import com.hkouki._blog.dto.UserSummaryResponse;
 
 @Service
 public class PostService {
@@ -105,7 +104,7 @@ public class PostService {
         if (!post.getAuthor().getId().equals(currentUser.getId()) && !currentUser.getRole().name().equals("ADMIN")) {
             throw new ResourceNotFoundException("You do not have permission to delete this post.");
         }
-        System.out.println(post + "==============hada howa post================");
+        System.out.println(post + " ==============hada howa post================");
         postRepository.delete(post);
     }
 
@@ -134,9 +133,19 @@ public class PostService {
         return "Post with ID " + postId + " has been unhidden.";
     }
 
-    // Fetch all posts for feed (all posts)
+    // Fetch feed posts from users that the current user is following
     public List<PostResponse> getFeed() {
-        return postRepository.findByHiddenFalseOrderByCreatedAtDesc() // only unhiden posts
+        User currentUser = userService.getCurrentUser();
+        List<User> followingUsers = followerRepository.findByFollower(currentUser)
+                .stream()
+                .map(Follower::getFollowing)
+                .collect(Collectors.toList());
+
+        if (followingUsers.isEmpty()) {
+            return List.of();
+        }
+
+        return postRepository.findByAuthorInAndHiddenFalseOrderByCreatedAtDesc(followingUsers)
                 .stream()
                 .map(this::mapToPostResponse)
                 .collect(Collectors.toList());

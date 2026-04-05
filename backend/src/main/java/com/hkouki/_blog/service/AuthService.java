@@ -74,6 +74,10 @@ public class AuthService {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
+        if (!user.isEnabled()) {
+            throw new InvalidCredentialsException("User is banned");
+        }
+
         String token = jwtService.generateToken(user.getId(), user.getRole(), user.getUsername());
         return new LoginResponse(token);
     }

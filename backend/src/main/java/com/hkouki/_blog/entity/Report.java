@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 @Table(name = "reports")
 @Getter
@@ -20,16 +23,19 @@ public class Report {
     // User who reported
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User reporter;
 
     // Reported post (if applicable)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_post_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Post reportedPost; // nullable
 
     // User being reported
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_user_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User reportedUser;
 
     // Reason for report

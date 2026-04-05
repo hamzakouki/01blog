@@ -116,7 +116,13 @@ public class UserService {
         if (user.getId().equals(currentUser.getId())) {
             throw new IllegalArgumentException("You cannot delete yourself");
         }
-        userRepository.delete(user);
+
+        try {
+            userRepository.delete(user);
+            userRepository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Cannot delete user because related content exists. Please remove posts/comments first.", ex);
+        }
     }
 
     // check if user is banned

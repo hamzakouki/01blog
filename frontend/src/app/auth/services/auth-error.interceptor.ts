@@ -16,9 +16,12 @@ export class AuthErrorInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     return next.handle(req).pipe(
+      
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          // 🔥 token expired or invalid
+        const isApiRequest = req.url.startsWith('http://localhost:8080/api/');
+        const isAuthRoute = req.url.includes('/api/auth') || req.url.includes('/api/login') || req.url.includes('/api/register');
+
+        if (isApiRequest && !isAuthRoute && (error.status === 401 || error.status === 403)) {
           this.auth.logout();
           this.router.navigate(['/login'], { replaceUrl: true });
         }

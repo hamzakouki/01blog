@@ -33,7 +33,9 @@ public class ReportService {
     }
 
     public ReportResponse[] getAllReports() {
-        return reportRepository.findByHandledFalse().stream()
+        // return all reports so admin can review handled and unhandled
+        return reportRepository.findAll().stream()
+                .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
                 .map(this::converter)
                 .toArray(ReportResponse[]::new);
     }

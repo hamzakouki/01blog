@@ -113,7 +113,14 @@ export class AdminDashboard implements OnInit {
       },
       error: err => {
         console.error(err);
-        this.error.set('Failed to update user status.');
+
+        if (err.status === 401) {
+          this.error.set('Unauthorized. Check your login and permissions.');
+        } else if (err.status === 409) {
+          this.error.set('Unable to delete user: user has related data (posts/comments). Clear dependencies and retry.');
+        } else {
+          this.error.set(err.error?.message || 'Failed to update user status.');
+        }
       }
     });
   }
@@ -139,9 +146,9 @@ export class AdminDashboard implements OnInit {
           this.postHiddenStatus.set(copy);
         } else {
           this.postHiddenStatus.set({ ...this.postHiddenStatus(), [postId]: action === 'hide' });
+          this.markReportHandled(report.id);
         }
 
-        this.markReportHandled(report.id);
       },
       error: err => {
         console.error(err);
@@ -164,8 +171,8 @@ export class AdminDashboard implements OnInit {
     this.http.put(`http://localhost:8080/api/reports/handle/${reportId}`, {})
       .subscribe({
         next: () => {
-          // Remove report from dashboard
-          this.reports.set(this.reports().filter(r => r.id !== reportId));
+          const updated = this.reports().map(r => r.id === reportId ? { ...r, handled: true } : r);
+          this.reports.set(updated);
         },
         error: err => console.error(err)
       });

@@ -1,0 +1,11 @@
+/* Minimal Chrome-based Bootstrap-only styling */
+/* Keep UI simple; no custom panels unless needed */
+.report-card {
+  margin-bottom: 16px;
+}
+.card-body {
+  padding: 16px;
+}
+.status-badge {
+  margin-top: 8px;
+}
